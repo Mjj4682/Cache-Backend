@@ -6,7 +6,7 @@ export class Users {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('int', { name: 'totalScore' })
+  @Column('int', { name: 'totalScore', default: null })
   totalScore: number;
 
   @OneToMany(() => Boss, (boss) => boss.userId)

@@ -17,4 +17,5 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   charset: 'utf8mb4',
   logging: true,
   keepConnectionAlive: true,
+  timezone: 'local',
 };
