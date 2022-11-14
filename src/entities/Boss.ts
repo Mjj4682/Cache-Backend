@@ -17,7 +17,10 @@ export class Boss {
   @Column({ name: 'score', default: 0 })
   score: number;
 
-  @Column('boolean', { name: 'canEnter', default: true })
+  @Column({ name: 'level' })
+  level: number;
+
+  @Column('boolean', { name: 'canEnter', default: false })
   canEnter: boolean;
 
   @CreateDateColumn()
