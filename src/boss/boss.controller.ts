@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { BossService } from './boss.service';
 
 @Controller('bossRaid')
@@ -8,5 +8,10 @@ export class BossController {
   @Get()
   raidStatus() {
     return this.bossService.raidStatus();
+  }
+
+  @Post('enter')
+  enterRaid(@Body() data: number) {
+    return this.bossService.enterRaid(data);
   }
 }
