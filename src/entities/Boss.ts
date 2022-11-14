@@ -14,6 +14,9 @@ export class Boss {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @Column({ name: 'score', default: 0 })
+  score: number;
+
   @Column('boolean', { name: 'canEnter', default: true })
   canEnter: boolean;
 
