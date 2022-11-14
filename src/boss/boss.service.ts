@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { Boss } from '../entities/Boss';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EnterRaidDto, EndRaidDto } from '../dto/raid.dto';
 
 @Injectable()
 export class BossService {
@@ -20,7 +21,7 @@ export class BossService {
     return raidStatus;
   }
 
-  async enterRaid(data: any) {
+  async enterRaid(data: EnterRaidDto) {
     const raidStatus = await this.bossRepository
       .createQueryBuilder('boss')
       .innerJoin('boss.userId', 'users')
@@ -40,5 +41,20 @@ export class BossService {
     });
     const obj = { ...userId, isEntered: true };
     return obj;
+  }
+
+  async endRaid(data: EndRaidDto) {
+    const raidUpdate = await this.bossRepository
+      .createQueryBuilder('boss')
+      .innerJoin('boss.userId', 'users')
+      .where(`boss.userId = ${data.userId}`)
+      .getRawOne();
+    console.log(raidUpdate);
+    if (!raidUpdate) {
+      throw new BadRequestException('userId error');
+    }
+    const newRaid = await this.bossRepository.findOneBy({ id: data.id });
+    newRaid.canEnter = true;
+    await this.bossRepository.save(newRaid);
   }
 }
