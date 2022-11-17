@@ -8,6 +8,7 @@ import { Boss } from './entities/Boss';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/ormconfig';
 import { BossModule } from './boss/boss.module';
+import { CachingModule } from './caching/caching.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { BossModule } from './boss/boss.module';
     TypeOrmModule.forRoot(typeORMConfig),
     UsersModule,
     BossModule,
+    CachingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
