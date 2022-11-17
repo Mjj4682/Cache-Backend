@@ -3,12 +3,16 @@ import { Boss } from '../entities/Boss';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EnterRaidDto, EndRaidDto } from '../dto/raid.dto';
+import { CachingService } from 'src/caching/caching.service';
 
 @Injectable()
 export class BossService {
+  private readonly URL: string =
+    'https://dmpilf5svl7rv.cloudfront.net/assignment/backend/bossRaidData.json';
   constructor(
     @InjectRepository(Boss)
     private bossRepository: Repository<Boss>,
+    private cacheManager: CachingService,
   ) {}
 
   async raidStatus() {
@@ -22,6 +26,20 @@ export class BossService {
   }
 
   async enterRaid(data: EnterRaidDto) {
+    let apiInfo = '';
+    await fetch(this.URL)
+      .then((response) => response.json())
+      .then((datas) => (apiInfo = datas.bossRaids[0]));
+    await this.cacheManager.set(
+      'bossRaidLimitSeconds',
+      apiInfo['bossRaidLimitSeconds'],
+      3600,
+    );
+    await this.cacheManager.set('0', apiInfo['levels'][0].score, 3600);
+    await this.cacheManager.set('1', apiInfo['levels'][1].score, 3600);
+    await this.cacheManager.set('2', apiInfo['levels'][2].score, 3600);
+    const score = await this.cacheManager.get(String(data.level));
+    // const time = await this.cacheManager.get('bossRaidLimitSeconds'); 미구현
     const raidStatus = await this.bossRepository
       .createQueryBuilder('boss')
       .innerJoin('boss.userId', 'users')
@@ -33,13 +51,14 @@ export class BossService {
     }
     const boss = new Boss();
     boss.level = data.level;
+    boss.score = score;
     boss.userId = data.userId;
     await this.bossRepository.save(boss);
-    const userId = await this.bossRepository.findOne({
+    const bossId = await this.bossRepository.findOne({
       select: { id: true },
       where: { id: boss.id },
     });
-    const obj = { ...userId, isEntered: true };
+    const obj = { ...bossId, isEntered: true };
     return obj;
   }
 
@@ -49,7 +68,6 @@ export class BossService {
       .innerJoin('boss.userId', 'users')
       .where(`boss.userId = ${data.userId}`)
       .getRawOne();
-    console.log(raidUpdate);
     if (!raidUpdate) {
       throw new BadRequestException('userId error');
     }
